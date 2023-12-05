@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>카드 결제 웹앱</title>
+        <link rel="icon" href="assets/icon-32.png">
+        <link rel="manifest" href="js13kpwa.webmanifest">
+        <meta name="mobile-web-app-capable" content="yes"> 
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <div class="overlay">
+            <div class="loader"></div>
+        </div>
+        <div id="top-bar"><h1>App card</h1></div>
+        <div id="content"> 
+            <div id="card" onclick="rotateCard(event)">
+                <div class="side front">
+                    <img class="card-img" src="assets/mc-debit-card_1280x650.png">
+                </div>
+                <div class="side back">
+                    <img id="barcode" src="assets/QRCode.png" alt="Barcode">
+                    <div class="button-container">
+                        <button onclick="postNormal(event)">정상 결제</button>
+                        <button onclick="postFraud(event)">이상 결제</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="js/data.js"></script>
+        <script src="js/main.js"></script>
+
+    </body>
+</html>
