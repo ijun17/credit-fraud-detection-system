@@ -23,13 +23,19 @@
                 <div class="side back">
                     <img id="barcode" src="assets/QRCode.png" alt="Barcode">
                     <div class="button-container">
-                        <button onclick="postNormal(event)">정상 결제</button>
-                        <button onclick="postFraud(event)">이상 결제</button>
+                        <button onclick="postPay(event,false)">정상 결제</button>
+                        <button onclick="postPay(event,true)">이상 결제</button>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="login">
+            <input type="text" id="username" name="username" required>
+            <input type="password" id="password" name="password" required>
+        </div>
+
         <script src="js/data.js"></script>
+        <script src="js/Cert.js"></script>
         <script src="js/main.js"></script>
 
     </body>

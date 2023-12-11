@@ -1,52 +1,67 @@
 const html_card = document.getElementById('card');
 const html_overlay= document.querySelector('.overlay');
 
-function rotateCard(event) {
-    html_card.classList.toggle("card-rotated")
-}
+function rotateCard(event) {html_card.classList.toggle("card-rotated")}
+function showLoading() {html_overlay.style.display = 'flex';}
+function hideLoading() {html_overlay.style.display = 'none';}
 
-function postData(data){
-    showLoading()
-    console.log(data)
-    fetch(`http://${window.location.host}:5000/receive_data`, {
+
+function post(loc, data, f1=()=>{}, f2=()=>{}){
+    console.log(JSON.stringify(data))
+    fetch(`https://${window.location.host}:5000/${loc}`, {
         method: 'POST',
-        mode:'cors',
+        mode: "cors",
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({"type":"pay", "info":data}),
+        body: JSON.stringify(data),
     })
     .then(response => response.json())
     .then(data => {
         console.log(data)
-        hideLoading()
-        switch(data.status){
-            case 'success':alert(`결제가 완료되었습니다.(${data.price}달러)`); break;
-            case 'fail':alert(`이상결제가 감지되었습니다.(${data.price}달러)`); break;
-            default : alert("오류"); break;
-        }
+        f1(data)
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error(error);
+        f2(error);
+    });
+}
+
+
+
+function postLogin(id=1234,pw=1234,publicKey=""){
+    post("login",{id:id,pw:pw,publicKey:publicKey},(data)=>{
+        if(data.status == "success") alert("로그인이 완료되었습니다.")
+        else alert("로그인이 실패했습니다.")
+    },(e)=>{alert("로그인 오류"+e)})
+}
+
+
+const cert = new Cert()
+cert.generateKey().then(()=>{
+    postLogin(1234,1234,cert.publicKeyPem)
+})
+
+
+
+
+async function postPay(event,isFraud=false){
+    event.stopPropagation();
+    showLoading()
+    const datas = isFraud?FRAUD_DATA:NORMAL_DATA
+    const data = datas[0]//Math.floor(Math.random()*datas.length)]
+    const data_str = JSON.stringify(data).split(' ').join('')
+    const signature = await cert.createSignature(data_str);
+
+    post("pay",{payment:data,signature:signature},(data)=>{
+        hideLoading()
+        switch(data.status){
+            case 'success-pay':alert(`결제가 완료되었습니다.(${data.price}달러)`); break;
+            case 'fail-pay':alert(`이상결제가 감지되었습니다.(${data.price}달러)`); break;
+            case 'fail-cert':alert(`인증되지 않은 사용자입니다.`); break;
+            default : alert("오류"+data.message); break;
+        }
+    },(error)=>{
         hideLoading()
         alert("오류"+error)
-    });
-    
+    })
 }
 
-function postFraud(event){
-    postData(FRAUD_DATA[Math.floor(Math.random()*FRAUD_DATA.length)])
-    event.stopPropagation();
-}
-
-function postNormal(event){
-    postData(NORMAL_DATA[Math.floor(Math.random()*NORMAL_DATA.length)])
-    event.stopPropagation();
-}
-
-function showLoading() {
-    html_overlay.style.display = 'flex';
-}
-
-
-function hideLoading() {
-    html_overlay.style.display = 'none';
-}
