@@ -37,26 +37,35 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
+from cryptography.exceptions import InvalidSignature
 
 
 # 전자 서명 검증
-def verify_signature(message, signature):
-    with open('_private/public_key.pem', 'rb') as key_file:
-        public_key = load_pem_public_key(key_file.read(), backend=default_backend())
+def verify_signature(data, signature_base64):
+    with open("_private/public_key.pem", 'rb') as key_file:
+        public_key = load_pem_public_key(key_file.read(),backend=default_backend())
+
     try:
+        # Decode base64-encoded signature
+        signature = base64.b64decode(signature_base64)
+
+        # Verify the signature
         public_key.verify(
-            base64.b64decode(signature),
-            message.encode('utf-8'),
+            signature,
+            data.encode('utf-8'),
             padding.PSS(
                 mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
+                salt_length=32  # padding.PSS.MAX_LENGTH
             ),
             hashes.SHA256()
         )
         print("서명 검증 성공")
         return True
+    except InvalidSignature:
+        print("서명 검증 실패: 유효하지 않은 서명")
+        return False
     except Exception as e:
-        print("서명 검증 실패:", e)
+        print(f"서명 검증 실패: {e}")
         return False
 
 
@@ -70,7 +79,7 @@ CORS(app)
 def login():
     try:
         data = request.json
-        if(data['id'] == 1234 and data['pw'] == 1234):
+        if(data['id'] == "1234" and data['pw'] == "4321"):
             with open('_private/public_key.pem', 'w') as f:
                 f.write(data['publicKey'])
             print("로그인 완료")
@@ -87,6 +96,7 @@ def login():
 def pay():
     try:
         data = request.json
+        print("\n\n-----payment-----")
         payment_str = json.dumps(data['payment']).replace(" ", "")
         print(payment_str)
         print(data['signature'])
@@ -101,10 +111,12 @@ def pay():
         y = df['Class'].loc[0]
         if is_fraud(df.drop('Class', axis=1)):
             print(y,price,"이상결제가 감지되었습니다.",datetime.now())
-            # send_email('이상 결제', f'이상 결제가 감지되었습니다 \n{price}달러 \n{datetime.now()}')
+            send_email('이상 결제', f'이상 결제가 감지되었습니다 \n{price}달러 \n{datetime.now()}')
+            print("-----------------\n")
             return {"status": "fail-pay","price":str(price)}
         else :
             print(y,price,"결제가 완료되었습니다.",datetime.now())
+            print("-----------------\n")
             return {"status": "success-pay","price":str(price)}
     except Exception as e:
         return {"status": "error", "message": str(e)}

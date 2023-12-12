@@ -128,3 +128,34 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+
+
+.login-form{
+    display: flex;
+    /* align-items: center; */
+    justify-content:space-evenly;
+    width:100%;
+    text-align: center;
+}
+
+.id, .pw{
+    width:30vw;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    height: 5vh;
+}
+.login{
+    width:30vw;
+    background-color: #4caf50;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    height: 5vh;
+}

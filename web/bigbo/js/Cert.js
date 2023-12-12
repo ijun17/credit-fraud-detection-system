@@ -45,7 +45,6 @@ class Cert {
             // 메시지 해싱
             const encoder = new TextEncoder();
             const data = encoder.encode(message);
-            const hashBuffer = await subtleCrypto.digest('SHA-256', data);
 
             // 전자서명 생성
             const signature = await subtleCrypto.sign(
@@ -54,13 +53,13 @@ class Cert {
                     saltLength: 32,
                 },
                 this.keyPair.privateKey,
-                hashBuffer
+                data
             );
             console.log("전자서명",signature)
             // Base64 인코딩
             const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
         
-            console.log('메시지:',message,'\n\n','전자서명:', signatureBase64);
+            console.log('메시지: ',message,'\n\n','전자서명: ', signatureBase64);
             return signatureBase64
         } catch (error) {
             console.error('전자서명 생성 실패:', error);
