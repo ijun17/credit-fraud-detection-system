@@ -55,7 +55,6 @@ class Cert {
                 this.keyPair.privateKey,
                 data
             );
-            console.log("전자서명",signature)
             // Base64 인코딩
             const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
         

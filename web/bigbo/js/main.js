@@ -59,7 +59,7 @@ async function postPay(event,isFraud=false){
     const data = datas[Math.floor(Math.random()*datas.length)]
     const data_str = JSON.stringify(data).split(' ').join('')
     const signature = await cert.createSignature(data_str);
-    alert('메시지:'+data_str+'\n\n'+'전자서명:'+signature)
+    // alert('메시지:'+data_str+'\n\n'+'전자서명:'+signature)
     post("pay",{payment:data,signature:signature},(data)=>{
         hideLoading()
         switch(data.status){
