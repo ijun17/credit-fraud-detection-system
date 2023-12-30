@@ -2,8 +2,6 @@ class Cert {
     keyPair
     privateKey;
     publicKey;
-    publicKeyBase64
-    privateKeyBase64
     publicKeyPem
     privateKeyPem
     constructor(){}
@@ -26,10 +24,8 @@ class Cert {
             this.keyPair = keyPair
             this.publicKey = await subtleCrypto.exportKey('spki', keyPair.publicKey);
             this.privateKey = await subtleCrypto.exportKey('pkcs8', keyPair.privateKey);
-            this.publicKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(this.publicKey)));
-            this.privateKeyBase64 = btoa(String.fromCharCode(...new Uint8Array(this.privateKey)));
-            this.publicKeyPem = this.exportKeyToPem(this.publicKeyBase64, "PUBLIC")
-            this.privateKeyPem = this.exportKeyToPem(this.privateKeyBase64, "PRIVATE")
+            this.publicKeyPem = this.exportKeyToPem(this.publicKey, "PUBLIC")
+            this.privateKeyPem = this.exportKeyToPem(this.privateKey, "PRIVATE")
         
             console.log(this.publicKeyPem);
             console.log(this.privateKeyPem);
@@ -55,6 +51,7 @@ class Cert {
                 this.keyPair.privateKey,
                 data
             );
+            console.log("전자서명",signature)
             // Base64 인코딩
             const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
         
@@ -67,15 +64,10 @@ class Cert {
     }
 
 
-    exportKeyToPem(keybase64, type) {
-        if(type != 'PUBLIC' && type != 'PRIVATE')console.error("invalid key type")
-
-        const chunks = [];
-        for (let i = 0; i < keybase64.length; i += 64) {
-            chunks.push(keybase64.slice(i, i + 64));
-        }
-    
-        const pemString = `-----BEGIN ${type} KEY-----\n${chunks.join('\n')}\n-----END ${type} KEY-----`;
-        return pemString;
+    exportKeyToPem(key, keytype) {
+        if(keytype != 'PUBLIC' && keytype != 'PRIVATE')console.error("invalid key type")
+        const exportedAsString = String.fromCharCode.apply(null, new Uint8Array(key));
+        const exportedAsBase64 = window.btoa(exportedAsString);
+        return `-----BEGIN ${keytype} KEY-----\n${exportedAsBase64}\n-----END ${keytype} KEY-----`;
     }
 }
